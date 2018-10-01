@@ -27,9 +27,6 @@ import pl.edu.mimuw.students.kp385996.restfulgenericgeometry._
 
 import runtime.Security
 import runtime.SandboxSecurityPolicy
-import types.AlgebraicTypes
-import runtime.PluginLoader
-import geometry.Vectors.Norm
 
 @EnableWebSecurity
 class WebSecurityConfig extends WebSecurityConfigurerAdapter {
