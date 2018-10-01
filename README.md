@@ -39,7 +39,7 @@ Every request has to contain fields:
 `"InnerProduct"`, `"Norm"` are described in [Defining own types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-own-types-operation-contexts-inner-products-norms).
 
 ### Identifiers' fields
-An identifier is a string starting with `'$'` character (e.g. `"$v1"`). Its value could be given explicitly (e.g. `"a": 5`), a link to other identifier (e.g. `"$a": "$b"`) or an operation (e.g. `{"+": [5, 7]}`)
+An identifier is a string starting with `'$'` character (e.g. `"$v1"`). Its value could be given explicitly (e.g. `"a": 5`), a link to other identifier (e.g. `"$a": "$b"`) or an operation (e.g. `"$a": {"+": [5, 7]}`)
 
 ### Explicit values
 There are two defaultly supported explicit values: scalars and vectors. Vector is a simple list of scalars. E.g. for fractional types like `"Double"` or `"Float"` values `5.0`, `1`, `3.14` are scalars and `[5.0, 1, 3.14]` is a vector.
