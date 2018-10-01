@@ -12,7 +12,15 @@ Contents:
    - [Operations](https://github.com/krzpiesiewicz/restful-generic-geometry#operations)
    - [List of operations](https://github.com/krzpiesiewicz/restful-generic-geometry#list-of-operations)
 2. [Defining own types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-own-types-operation-contexts-inner-products-norms)
+   - [Creating own inner products and norms](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-own-inner-products-and-norms)
+   - [Creating own types](https://github.com/krzpiesiewicz/restful-generic-geometry#Creating-own-types)
+   - [Creating own operation contexts](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-own-operation-contexts)
+   - [Using own types and context in task request](https://github.com/krzpiesiewicz/restful-generic-geometry#using-own-types-and-context-in-task-request)
+   - [Creating custom serialization and deserialization](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-serialization-and-deserialization)
 3. [Security](https://github.com/krzpiesiewicz/restful-generic-geometry#security)
+   - [Denying access to network and file descriptors](https://github.com/krzpiesiewicz/restful-generic-geometry#denying-access-to-network-and-file-descriptors)
+   - [Canceling task with simple operation lasting too long](https://github.com/krzpiesiewicz/restful-generic-geometry#canceling-task-with-simple-operation-lasting-too-long)
+   - [Remark](https://github.com/krzpiesiewicz/restful-generic-geometry#remark)
 
 ## Basics
 The basic service is calculating algebraic tasks sent to server as JSON (`http://127.0.0.1:1235/task`, `Content-Type: application/json`).
@@ -46,7 +54,7 @@ An operation is a JSON node with one field (the name/symbol of the operation) wi
 Operation arguments could be explicit values, identifiers or operation. See examples below:
 
 Request 1:
-```
+```javascript
 {
   "Type": "Double",
   "$v1": {"+": [[1.0, 1.0], [1.5, 2.1]]},
@@ -57,7 +65,7 @@ Request 1:
 }
 ```
 Result for request 1:
-```
+```javascript
 {
   "v1": [2.5, 3.1],
   "v2": [5.0, 15.0],
@@ -67,7 +75,7 @@ Result for request 1:
 ```
 
 2. Request 2 (nested operations):
-```
+```javascript
 {
   "Type": "Double",
   "$res": {"dot": [
@@ -87,7 +95,7 @@ Result for request 1:
 }
 ```
 Result for request 1
-```
+```javascript
 59.0
 ```
 
@@ -117,5 +125,243 @@ Unary operations:
       - `"norm"` (if an `AlgebraicFieldWithSqrt[T]` given)
    
 ## Defining own types, operation contexts, inner products, norms.
+You can send to server codes written in Scala or Java.
+### Creating own inner products and norms
+The default InnerProduct is the standard inner product and the default Norm is the Euclidean norm.
+Look how to create the manhatan (taxicab) norm in Scala: `http://127.0.0.1:1235/norm/set?id=manhatanNorm&className=ManhatanNorm&lang=scala`
+```scala
+import pl.edu.mimuw.students.kp385996.genericgeometry.geometry.Algebra._
+import pl.edu.mimuw.students.kp385996.genericgeometry.geometry.Vectors._
 
+class ManhatanNorm extends Norm {
+  import AlgebraicFieldWithSqrt.implicits._
+      
+  def norm[T] = (field: AlgebraicFieldWithSqrt[T]) => {
+    (innerProd: InnerProduct) => (v: Vec[T]) => {
+      implicit val _: AlgebraicFieldWithSqrt[T] = field
+ 
+      v.coords.foldLeft(field.zero)((sum: T, c: T) => sum + (c * c).sqrt)
+    }
+  }
+}
+```
+
+and how to use it:
+```javascript
+{
+  "Type": "Double",
+  "Norm": "manhatanNorm",
+  "$n": {"norm": [[1.0, 1.0]]},
+  "Res": "$n"
+}
+```
+
+result:
+```javascript
+2.0
+```
+### Creating own types
+in Scala: `http://127.0.0.1:1235/type/set?id=Complex&className=MyComplex&lang=scala`
+```scala
+case class MyComplex(val re: Double, val im: Double)
+```
+
+in Java: `http://127.0.0.1:1235/type/set?id=Complex&className=MyComplex&lang=java`
+```java
+class MyComplex {
+
+  public final double re;
+  public final double im;
+  
+  public MyComplex() {
+    re = im = 0.0;
+  }
+  
+  public MyComplex(double r, double i) {
+    re = r; im = i;
+  }
+}
+```
+
+### Creating own operation contexts
+in Scala: `http://127.0.0.1:1235/context/set?contextID=ComplexField&typeID=Complex&className=ComplexField&lang=scala`
+```scala
+import pl.edu.mimuw.students.kp385996.genericgeometry.geometry.Algebra._
+import pl.edu.mimuw.students.kp385996.genericgeometry.geometry.Vectors._
+
+class ComplexField extends AlgebraicField[MyComplex] {
+  type T = MyComplex
+
+  val zero = new MyComplex(0, 0)
+  val one = new MyComplex(1, 0)
+
+  def plus(x: T, y: T) = new MyComplex(x.re + y.re, x.im + y.im)
+  def minus(x: T, y: T) = new MyComplex(x.re - y.re, x.im - y.im)
+
+  def times(x: T, y: T) = new MyComplex(x.re * y.re - x.im * y.im, x.re * y.im + x.im * y.re)
+  def divide(x: T, y: T) = new MyComplex((x.re * y.re + x.im * y.im) / (x.im * x.im + y.im * y.im), (x.im * y.re - x.re * y.im) / (x.im * x.im + y.im * y.im))
+}
+```
+
+in Java it is similar :smirk:
+
+### Using own types and context in task request
+```javascript
+{
+  "Context": "ComplexField",
+  "$c": {"*": ["$a", "$b"]},
+  "$a": {"re": 3, "im": 3},
+  "$b": {"re": -1, "im": 4},
+  "Res": "$c"
+}
+```
+result:
+```javascript
+{
+  "re": -15,
+  "im": 9.0
+}
+```
+
+### Creating custom serialization and deserialization
+in Scala: `http://127.0.0.1:1235/type/set?id=Complex&className=MyComplex&lang=scala`
+```scala
+import com.fasterxml.jackson.annotation._
+
+case class MyComplex(@JsonProperty("Re") val re: Double, @JsonProperty("Im") val im: Double)
+```
+
+in Java: `http://127.0.0.1:1235/type/set?id=Complex&className=MyComplex&lang=java`
+```java
+import com.fasterxml.jackson.annotation.*;
+
+class MyComplex {
+
+  @JsonProperty("Re")
+  public final Double re;
+  
+  @JsonProperty("Im")
+  public final Double im;
+  
+  public MyComplex() {
+    re = im = 0.0;
+  }
+  
+  public MyComplex(double r, double i) {
+    re = r; im = i;
+  }
+}
+```
+
+Then we use `"Re"` and `"Im"` in task requests:
+```javascript
+{
+  "Context": "ComplexField",
+  "$c": {"*": ["$a", "$b"]},
+  "$a": {"Re": 3, "Im": 3},
+  "$b": {"Re": -1, "Im": 4},
+  "Res": "$c"
+}
+```
+
+result:
+```javascript
+{
+  "Re": -15,
+  "Im": 9.0
+}
+```
 ## Security
+Thanks to java security policy I have managed to implement blocking some types of attacks.
+
+### Denying access to network and file descriptors
+```scala
+import pl.edu.mimuw.students.kp385996.restfulgenericgeometry.geometry.Vectors._
+import java.io._
+
+class ManhatanNorm extends Norm {
+  import AlgebraicFieldWithSqrt.implicits._
+      
+  def norm[T] = (field: AlgebraicFieldWithSqrt[T]) => {
+    (innerProd: InnerProduct) => (v: Vec[T]) => {
+      implicit val _: AlgebraicFieldWithSqrt[T] = field
+      
+      val w = new FileWriter(new File("EvilManhatanNorm.txt"))
+      w.write("HAHAHAAAAAAAaaaaa")
+      w.flush
+      w.close
+      
+      v.coords.foldLeft(field.zero)((sum: T, c: T) => sum + (c * c).sqrt)
+    }
+  }
+}
+```
+When we run task:
+```javascript
+{
+  "Type": "Double",
+  "Norm": "evilManhatanNorm",
+  "$n": {"norm": [[1.0, 1.0]]},
+  "Res": "$n"
+}
+```
+, we get:
+```javascript
+{
+  "timestamp": 1538412219853,
+  "status": 403,
+  "error": "Forbidden",
+  "message": "java.security.AccessControlException: access denied (\"java.io.FilePermission\" \"EvilManhatanNorm.txt\" \"write\")",
+  "path": "/task"
+}
+```
+
+### Canceling task with simple operation lasting too long
+`http://127.0.0.1:1235/context/set?contextID=SlowComplexField&typeID=Complex&className=ComplexField&lang=scala`
+```scala
+import pl.edu.mimuw.students.kp385996.restfulgenericgeometry.geometry.Algebra._
+import pl.edu.mimuw.students.kp385996.restfulgenericgeometry.geometry.Vectors._
+
+class ComplexField extends AlgebraicField[MyComplex] {
+  type T = MyComplex
+
+  val zero = new MyComplex(0, 0)
+  val one = new MyComplex(1, 0)
+
+  def plus(x: T, y: T) = new MyComplex(x.re + y.re, x.im + y.im)
+  def minus(x: T, y: T) = new MyComplex(x.re - y.re, x.im - y.im)
+
+  def times(x: T, y: T) = {
+    Thread.sleep(2000)
+    new MyComplex(x.re * y.re - x.im * y.im, x.re * y.im + x.im * y.re)
+  }
+  def divide(x: T, y: T) = new MyComplex((x.re * y.re + x.im * y.im) / (x.im * x.im + y.im * y.im), (x.im * y.re - x.re * y.im) / (x.im * x.im + y.im * y.im))
+}
+```
+
+when we run task:
+```javascript
+{
+  "Context": "SlowComplexField",
+  "$c": {"*": ["$a", "$b"]},
+  "$a": {"re": 3, "im": 3},
+  "$b": {"re": -1, "im": 4},
+  "Res": "$c"
+}
+```
+
+we get:
+```javascript
+{
+  "timestamp": 1538412672750,
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Single operation lasts too long (more than 100 ms).",
+  "path": "/task"
+}
+```
+
+### Remark
+Of course the above security tricks are too weak. For instance, there should be:
+- denying creating threads (editing policy of ThreadGroup could help),
+- preventing alocating too much memory.
