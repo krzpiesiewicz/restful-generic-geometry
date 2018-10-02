@@ -275,6 +275,7 @@ result:
 Thanks to java security policy I have managed to implement blocking some types of attacks.
 
 ### Denying access to network and file descriptors
+`http://127.0.0.1:1235/norm/set?id=evilManhatanNorm&className=ManhatanNorm&lang=scala`
 ```scala
 import pl.edu.mimuw.students.kp385996.restfulgenericgeometry.geometry.Vectors._
 import java.io._
