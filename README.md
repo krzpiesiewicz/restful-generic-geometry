@@ -23,7 +23,7 @@ Contents:
    - [Remark](https://github.com/krzpiesiewicz/restful-generic-geometry#remark)
 
 ## Basics
-The basic service is calculating algebraic tasks sent to server as JSON (`http://127.0.0.1:1235/task`, `Content-Type: application/json`).
+The basic service is calculating algebraic tasks sent to the server as JSON (`http://127.0.0.1:1235/task`, `Content-Type: application/json`).
 
 Such a request can have 3 kinds of fields:
 1. Control fields (`"Type"`, `"Context"`, `"InnerProduct"`, `"Norm"`).
@@ -218,8 +218,39 @@ in Java it is similar :smirk:
 result:
 ```javascript
 {
-  "re": -15,
+  "re": -15.0,
   "im": 9.0
+}
+```
+
+Of course, we can use MyComplex as any other AlegebraicField, including vector operations:
+```
+{
+  "Context": "ComplexField",
+  "$dot": {"dot": ["$v1", "$v2"]},
+  "$mul": {"*": ["$v1", "$c"]},
+  "$v1": [{"re": 2, "im": 1}, {"re": 0, "im": 1000}],
+  "$v2": [{"re": 0.5, "im": -1}, {"re": -1000, "im": 0}],
+  "$c": {"re": 0.001, "im": 0},
+  "Res": {"MyFineResults": {"v1 dot v2": "$dot", "v1 * c": "$mul"}}
+}
+```
+result:
+```javascript
+{
+  "MyFineResults": {
+    "v1 dot v2": {
+      "re": 2.0,
+      "im": -1000001.5
+    },
+    "v1 * c": [{
+      "re": 0.002,
+      "im": 0.001
+    }, {
+      "re": 0.0,
+      "im": 1.0
+    }]
+  }
 }
 ```
 
@@ -267,7 +298,7 @@ Then we use `"Re"` and `"Im"` in task requests:
 result:
 ```javascript
 {
-  "Re": -15,
+  "Re": -15.0,
   "Im": 9.0
 }
 ```
@@ -306,7 +337,7 @@ When we run task:
   "Res": "$n"
 }
 ```
-, we get:
+we get:
 ```javascript
 {
   "timestamp": 1538412219853,
