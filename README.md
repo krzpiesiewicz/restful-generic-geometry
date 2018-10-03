@@ -61,7 +61,8 @@ Request 1:
   "$v2": {"*": [[1, 3], 5]},
   "$dot": {"dot": ["$v1", "$v2"]},
   "$nv2": {"normalized": ["$v2"]},
-  "Res": {"v1": "$v1", "v2": "$v2", "dot": "$dot", "nv2": "$nv2"}
+  "$sqrtOf2": {"sqrt": [2]},
+  "Res": {"v1": "$v1", "v2": "$v2", "dot": "$dot", "nv2": "$nv2", "sqrt(2)": "$sqrtOf2"}
 }
 ```
 Result for request 1:
@@ -70,7 +71,31 @@ Result for request 1:
   "v1": [2.5, 3.1],
   "v2": [5.0, 15.0],
   "dot": 59.0,
-  "nv2": [0.3162277660168379, 0.9486832980505138]
+  "nv2": [0.3162277660168379, 0.9486832980505138],
+  "sqrt(2)": 1.4142135623730951
+}
+```
+
+Of course, we can force the service to use Floats (the same request as above one, despite `"Type": "Float"`):
+```javascript
+{
+  "Type": "Float",
+  "$v1": {"+": [[1.0, 1.0], [1.5, 2.1]]},
+  "$v2": {"*": [[1, 3], 5]},
+  "$dot": {"dot": ["$v1", "$v2"]},
+  "$nv2": {"normalized": ["$v2"]},
+  "$sqrtOf2": {"sqrt": [2]},
+  "Res": {"v1": "$v1", "v2": "$v2", "dot": "$dot", "nv2": "$nv2", "sqrt(2)": "$sqrtOf2"}
+}
+```
+result:
+```javascript
+{
+  "v1": [2.5, 3.1],
+  "v2": [5.0, 15.0],
+  "dot": 59.0,
+  "nv2": [0.3162278, 0.9486834],
+  "sqrt(2)": 1.4142135
 }
 ```
 
