@@ -13,7 +13,7 @@ Contents:
    - [List of operations](https://github.com/krzpiesiewicz/restful-generic-geometry#list-of-operations)
 2. [Defining custom types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-custom-types-operation-contexts-inner-products-norms)
    - [Creating custom inner products and norms](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-inner-products-and-norms)
-   - [Creating custom types](https://github.com/krzpiesiewicz/restful-generic-geometry#Creating-custom-types)
+   - [Creating custom types](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-types)
    - [Creating custom operation contexts](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-operation-contexts)
    - [Using custom types and context in task request](https://github.com/krzpiesiewicz/restful-generic-geometry#using-custom-types-and-context-in-task-request)
    - [Creating custom serialization and deserialization](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-serialization-and-deserialization)
