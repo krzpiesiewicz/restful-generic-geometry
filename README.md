@@ -11,11 +11,11 @@ Contents:
    - [Result template](https://github.com/krzpiesiewicz/restful-generic-geometry#result-template)
    - [Operations](https://github.com/krzpiesiewicz/restful-generic-geometry#operations)
    - [List of operations](https://github.com/krzpiesiewicz/restful-generic-geometry#list-of-operations)
-2. [Defining own types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-own-types-operation-contexts-inner-products-norms)
-   - [Creating own inner products and norms](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-own-inner-products-and-norms)
-   - [Creating own types](https://github.com/krzpiesiewicz/restful-generic-geometry#Creating-own-types)
-   - [Creating own operation contexts](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-own-operation-contexts)
-   - [Using own types and context in task request](https://github.com/krzpiesiewicz/restful-generic-geometry#using-own-types-and-context-in-task-request)
+2. [Defining custom types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-custom-types-operation-contexts-inner-products-norms)
+   - [Creating custom inner products and norms](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-inner-products-and-norms)
+   - [Creating custom types](https://github.com/krzpiesiewicz/restful-generic-geometry#Creating-custom-types)
+   - [Creating custom operation contexts](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-operation-contexts)
+   - [Using custom types and context in task request](https://github.com/krzpiesiewicz/restful-generic-geometry#using-custom-types-and-context-in-task-request)
    - [Creating custom serialization and deserialization](https://github.com/krzpiesiewicz/restful-generic-geometry#creating-custom-serialization-and-deserialization)
 3. [Security](https://github.com/krzpiesiewicz/restful-generic-geometry#security)
    - [Denying access to network and file descriptors](https://github.com/krzpiesiewicz/restful-generic-geometry#denying-access-to-network-and-file-descriptors)
@@ -36,14 +36,14 @@ Every request has to contain fields:
 
 ### Control fields
 `"Type"` forces service to use certain type like: `Byte`, `Short`, `Int`, `Long`, `Float`, `Double` and own types declared by client. The `"Context"` specifies a nondefault operation object (e.g. client's group, ring, field) that should be used during calculating.
-`"InnerProduct"`, `"Norm"` are described in [Defining own types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-own-types-operation-contexts-inner-products-norms).
+`"InnerProduct"`, `"Norm"` are described in [Defining custom types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-custom-types-operation-contexts-inner-products-norms).
 
 ### Identifiers' fields
 An identifier is a string starting with `'$'` character (e.g. `"$v1"`). Its value could be given explicitly (e.g. `"a": 5`), a link to other identifier (e.g. `"$a": "$b"`) or an operation (e.g. `"$a": {"+": [5, 7]}`)
 
 ### Explicit values
 There are two defaultly supported explicit values: scalars and vectors. Vector is a simple list of scalars. E.g. for fractional types like `"Double"` or `"Float"` values `5.0`, `1`, `3.14` are scalars and `[5.0, 1, 3.14]` is a vector.
-To create own manners of defining explicit values see [Defining own types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-own-types-operation-contexts-inner-products-norms).
+To create own manners of defining explicit values see [Defining custom types, operation contexts, inner products, norms](https://github.com/krzpiesiewicz/restful-generic-geometry#defining-custom-types-operation-contexts-inner-products-norms).
 
 ### Result template
 The value of `"Res"` is a JSONlike result template, where every identifier given as a JSON value is replaced by the value of the identifier. See examples below.
@@ -149,9 +149,9 @@ Unary operations:
    3. `Vec[T] --> T`
       - `"norm"` (if an `AlgebraicFieldWithSqrt[T]` given)
    
-## Defining own types, operation contexts, inner products, norms.
+## Defining custom types, operation contexts, inner products, norms.
 You can send to server codes written in Scala or Java.
-### Creating own inner products and norms
+### Creating custom inner products and norms
 The default InnerProduct is the standard inner product and the default Norm is the Euclidean norm.
 Look how to create the manhatan (taxicab) norm in Scala: `http://127.0.0.1:1235/norm/set?id=manhatanNorm&className=ManhatanNorm&lang=scala`
 ```scala
@@ -185,7 +185,7 @@ result:
 ```javascript
 2.0
 ```
-### Creating own types
+### Creating custom types
 in Scala: `http://127.0.0.1:1235/type/set?id=Complex&className=MyComplex&lang=scala`
 ```scala
 case class MyComplex(val re: Double, val im: Double)
@@ -208,7 +208,7 @@ class MyComplex {
 }
 ```
 
-### Creating own operation contexts
+### Creating custom operation contexts
 in Scala: `http://127.0.0.1:1235/context/set?contextID=ComplexField&typeID=Complex&className=ComplexField&lang=scala`
 ```scala
 import pl.edu.mimuw.students.kp385996.genericgeometry.geometry.Algebra._
@@ -230,7 +230,7 @@ class ComplexField extends AlgebraicField[MyComplex] {
 
 in Java it is similar :smirk:
 
-### Using own types and context in task request
+### Using custom types and context in task request
 ```javascript
 {
   "Context": "ComplexField",
